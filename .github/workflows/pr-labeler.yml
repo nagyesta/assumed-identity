@@ -1,0 +1,16 @@
+name: PullRequestLabeler
+on:
+  pull_request:
+    types: [opened]
+
+permissions: read-all
+
+jobs:
+  pr-labeler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: TimonVS/pr-labeler-action@8b99f404a073744885d8021d1de4e40c6eaf38e2 # v4
+        with:
+          configuration-path: .github/pr-labeler.yml # optional, .github/pr-labeler.yml is the default value
+        env:
+          GITHUB_TOKEN: ${{ secrets.PUBLISH_KEY }}

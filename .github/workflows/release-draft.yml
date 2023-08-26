@@ -1,0 +1,21 @@
+name: CreateRelease
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    name: Draft release action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        with:
+          script: |
+            github.rest.repos.createRelease({
+              owner: "${{ github.repository_owner }}",
+              repo: "assumed-identity",
+              tag_name: "${{ github.ref_name }}",
+              generate_release_notes: true,
+              draft: true
+            });

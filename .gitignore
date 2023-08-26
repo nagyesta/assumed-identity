@@ -1,0 +1,6 @@
+.idea/
+build
+.gradle
+.pytest_cache
+venv
+src/python/.pytest_cache

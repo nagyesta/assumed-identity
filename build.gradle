@@ -1,0 +1,157 @@
+plugins {
+    id 'java'
+    id "io.toolebox.git-versioner" version "1.6.7"
+}
+
+group = 'com.github.nagyesta'
+
+project.ext {
+    gitUser = project.hasProperty('githubUser') ? (project.property('githubUser') as String) : ''
+    gitToken = project.hasProperty('githubToken') ? (project.property('githubToken') as String) : ''
+    repoUrl = 'https://github.com/nagyesta/assumed-identity'
+    licenseName = 'MIT License'
+    licenseUrl = 'https://raw.githubusercontent.com/nagyesta/assumed-identity/main/LICENSE'
+    maintainerId = 'nagyesta'
+    maintainerName = 'Istvan Zoltan Nagy'
+    maintainerUrl = 'https://github.com/nagyesta/'
+}
+
+versioner {
+    startFrom {
+        major = 1
+        minor = 0
+        patch = 0
+    }
+    match {
+        major = '{major}'
+        minor = '{minor}'
+        patch = '{patch}'
+    }
+    pattern {
+        pattern = "%M.%m.%p"
+    }
+    git {
+        authentication {
+            https {
+                token = project.ext.gitToken
+            }
+        }
+    }
+    tag {
+        prefix = 'v'
+        useCommitMessage = true
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+}
+
+versioner.apply()
+
+tasks.register('upgradePip', Exec) {
+    group "python"
+    workingDir "src/python"
+    commandLine "python", "-m", "pip", "install", "--upgrade", "pip"
+}
+
+tasks.register('installPytest', Exec) {
+    group "python"
+    workingDir "src/python"
+    commandLine "python", "-m", "pip", "install", "pytest"
+    dependsOn(":upgradePip")
+}
+
+tasks.register('installRequirements', Exec) {
+    group "python"
+    workingDir "src/python"
+    commandLine "pip", "install", "-r", "requirements.txt"
+    dependsOn(":upgradePip")
+}
+
+tasks.register('pytest', Exec) {
+    group "python"
+    workingDir "src/python"
+    commandLine "python", "-m", "pytest", "test.py"
+    dependsOn(":installPytest")
+    dependsOn(":installRequirements")
+}
+
+tasks.register('copyDockerfile', Copy) {
+    group "Docker"
+    inputs.file("src/docker/Dockerfile")
+    outputs.file(layout.buildDirectory.file("docker/Dockerfile"))
+    from file("src/docker/Dockerfile")
+    into file(layout.buildDirectory.dir("docker"))
+    rename {
+        'Dockerfile'
+    }
+    dependsOn(":pytest")
+}
+
+tasks.register('prepareDockerApp', Copy) {
+    group "Docker"
+    inputs.file("src/python/app.py")
+    outputs.file(layout.buildDirectory.file("docker/app.py"))
+    from file("src/python/app.py")
+    into file(layout.buildDirectory.dir("docker"))
+    rename {
+        'app.py'
+    }
+    dependsOn(":pytest")
+}
+
+tasks.register('prepareDockerRequirements', Copy) {
+    group "Docker"
+    inputs.file("src/python/requirements.txt")
+    outputs.file(layout.buildDirectory.file("docker/requirements.txt"))
+    from file("src/python/requirements.txt")
+    into file(layout.buildDirectory.dir("docker"))
+    rename {
+        'requirements.txt'
+    }
+    dependsOn(":pytest")
+}
+
+tasks.register('createDockerBuildx', Exec) {
+    group "Docker"
+    workingDir layout.buildDirectory.dir("docker")
+    commandLine "docker", "buildx", "create", "--use"
+    dependsOn(":copyDockerfile")
+    dependsOn(":prepareDockerApp")
+    dependsOn(":prepareDockerRequirements")
+}
+
+tasks.register('buildDocker', Exec) {
+    group "Docker"
+    inputs.dir(layout.buildDirectory.dir("docker"))
+    workingDir layout.buildDirectory.dir("docker")
+    commandLine "docker", "buildx", "build", "--platform", "linux/arm64,linux/amd64,linux/arm/v7",
+            "--pull", "-t", "nagyesta/assumed-identity:${project.version}", "."
+    dependsOn(":createDockerBuildx")
+}
+
+tasks.register('buildDockerPush', Exec) {
+    group "Docker"
+    inputs.dir(layout.buildDirectory.dir("docker"))
+    workingDir layout.buildDirectory.dir("docker")
+    commandLine "docker", "buildx", "build", "--platform", "linux/arm64,linux/amd64,linux/arm/v7",
+            "--push", "-t", "nagyesta/assumed-identity:${project.version}", "."
+}
+
+tasks.register('buildDockerLocal', Exec) {
+    group "Docker"
+    inputs.dir(layout.buildDirectory.dir("docker"))
+    workingDir layout.buildDirectory.dir("docker")
+    commandLine "docker", "build", "-t", "assumed-identity:${project.version}", "."
+    dependsOn(":copyDockerfile")
+    dependsOn(":prepareDockerApp")
+    dependsOn(":prepareDockerRequirements")
+}
