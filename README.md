@@ -15,9 +15,9 @@ tokens).
 
 ### Usage
 
-#### Starting the container
+#### Starting the container (on a developer machine)
 
-Assumed Identity must use the `169.254.169.254` IP in order to replace the real Managed Identity mechanism with the fake
+Assumed Identity must use the `169.254.169.254` IP in order to simulate the real Managed Identity mechanism with the fake
 token provider. To achieve this you need to first create an appropriate network with Docker.
 
 ```
@@ -41,6 +41,34 @@ It should respond with a token similar to this:
 ```json
 {"access_token":"dummy","expires_in":172800,"expires_on":1693250639,"refresh_token":"dummy","resource":"https://localhost/","token_type":1}
 ```
+
+#### Starting the container (on a cloud hosted VM)
+
+The default configuration (as detailed in the usage section) does not work on cloud VMs because they are using the
+`169.254.169.254` IP for the real service providing instance metadata. As a workaround, you can simply start the
+Assumed Identity container with the default, automatically assigned IP and configure it to use a non-default port.
+For example by using the following command:
+
+```
+docker run -e ASSUMED_ID_PORT=8080 -p 8080:8080 --rm nagyesta/assumed-identity:<version>
+```
+
+Please find the list of available versions [here](https://hub.docker.com/r/nagyesta/assumed-identity/tags).
+
+Once the container is started, you can test it by navigating to
+[http://localhost:8080/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://localhost/](http://localhost:8080/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://localhost/)
+
+It should respond with a token similar to this:
+
+```json
+{"access_token":"dummy","expires_in":172800,"expires_on":1693250639,"refresh_token":"dummy","resource":"https://localhost/","token_type":1}
+```
+
+When you have verified that your Assumed Identity instance is working as expected, you can configure the tested
+application to use it by adding the appropriate environment variables depending on the language and the client
+implementation. These are specifically mentioned in the Lowkey Vault examples 
+[here](https://github.com/nagyesta/lowkey-vault#example-projects).
+
 #### Optional parameters
 
 You can pass environmental variables with the following names and functions to alter Assumed Identity configuration
@@ -54,9 +82,3 @@ You can pass environmental variables with the following names and functions to a
 
 For complete examples of how it can be used in action, please feel free to visit the Lowkey Vault examples which can
 be found [here](https://github.com/nagyesta/lowkey-vault#example-projects).
-
-### Limitations
-
-This tool was never tested on a VM running in Azure, but probably it wouldn't work, because of the real Instance 
-MetaData Service which is already using this IP. Please note that this is not the intended use-case and won't be
-supported.
