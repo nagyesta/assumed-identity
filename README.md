@@ -41,6 +41,14 @@ It should respond with a token similar to this:
 ```json
 {"access_token":"dummy","expires_in":172800,"expires_on":1693250639,"refresh_token":"dummy","resource":"https://localhost/","token_type":1}
 ```
+#### Optional parameters
+
+You can pass environmental variables with the following names and functions to alter Assumed Identity configuration
+
+| Name            | Default | Description                                                                     |
+|-----------------|---------|---------------------------------------------------------------------------------|
+| ASSUMED_ID_PORT | 80      | The port where Assumed Identity will listen to requests.                        |
+| ASSUMED_ID_HOST | 0.0.0.0 | The host/IP Assumed Identity will use to listen to requests. 0.0.0.0 means any. |
 
 #### Examples
 
