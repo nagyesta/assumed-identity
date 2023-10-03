@@ -1,4 +1,4 @@
-FROM python:3.11.5-alpine3.18
+FROM python:3.11.6-alpine3.18
 LABEL maintainer="nagyesta@gmail.com"
 WORKDIR /app
 COPY requirements.txt /app/
