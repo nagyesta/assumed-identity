@@ -1,3 +1,3 @@
 Flask==3.0.0
-Flask-Parameter-Validation==2.2.3
+Flask-Parameter-Validation==2.2.4
 python-dateutil==2.8.2
