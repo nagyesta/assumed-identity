@@ -133,7 +133,7 @@ tasks.register('buildDocker', Exec) {
     group "Docker"
     inputs.dir(layout.buildDirectory.dir("docker"))
     workingDir layout.buildDirectory.dir("docker")
-    commandLine "docker", "buildx", "build", "--platform", "linux/arm64,linux/amd64,linux/arm/v7",
+    commandLine "docker", "buildx", "build", "--platform", "linux/arm64,linux/amd64",
             "--pull", "-t", "nagyesta/assumed-identity:${project.version}", "."
     dependsOn(":createDockerBuildx")
 }
@@ -142,7 +142,7 @@ tasks.register('buildDockerPush', Exec) {
     group "Docker"
     inputs.dir(layout.buildDirectory.dir("docker"))
     workingDir layout.buildDirectory.dir("docker")
-    commandLine "docker", "buildx", "build", "--platform", "linux/arm64,linux/amd64,linux/arm/v7",
+    commandLine "docker", "buildx", "build", "--platform", "linux/arm64,linux/amd64",
             "--push", "-t", "nagyesta/assumed-identity:${project.version}", "."
 }
 
