@@ -39,7 +39,7 @@ url_regexp = ('^(http(s)?)://'
 @app.route(rule='/metadata/identity/oauth2/token', methods=['GET'])
 @ValidateParameters()
 def token(resource: str = Query(pattern=url_regexp)):
-    return get_token_metadata(resource)
+    return get_token_metadata(resource), 200, {"WWW-Authenticate": "Basic realm=assumed-identity"}
 
 
 def process_arguments() -> Namespace:
