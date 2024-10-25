@@ -37,6 +37,7 @@ url_regexp = ('^(http(s)?)://'
 
 
 @app.route(rule='/metadata/identity/oauth2/token', methods=['GET'])
+@app.route(rule='/metadata/identity/oauth2/token/', methods=['GET'])
 @ValidateParameters()
 def token(resource: str = Query(pattern=url_regexp)):
     return get_token_metadata(resource)
