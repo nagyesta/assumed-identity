@@ -1,11 +1,13 @@
-__Issue:__ N/A <!-- #issue number -->
+**Issue:** N/A <!-- #issue number -->
 
 ### Description
+
 <!-- A short summary of changes -->
 
 -
 
 ### Entry point
+
 <!-- Where should the reviewer start in order to properly understand the PR? -->
 
 -
@@ -18,5 +20,4 @@ __Issue:__ N/A <!-- #issue number -->
 
 ### Notes
 
--
-<!-- Any additional remarks you may have. -->
+- <!-- Any additional remarks you may have. -->

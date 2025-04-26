@@ -1,9 +1,10 @@
 import time
 import unittest
+import pytest
 
 import app
 
-
+@pytest.mark.skip(reason="helper method")
 def test_client():
     application = app.app
     application.config.update({
@@ -24,7 +25,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(actual.keys(),
                          {"resource", "access_token", "refresh_token", "expires_in", "expires_on", "token_type"},
                          "Response should have been a token metadata JSON object")
-        self.assertEqual(1, actual["token_type"], "Response should have been a Bearer token")
+        self.assertEqual("Bearer", actual["token_type"], "Response should have been a Bearer token")
         self.assertIsNotNone(actual["access_token"], "Response should have an access token")
         self.assertIsNotNone(actual["refresh_token"], "Response should have a refresh token")
         self.assertGreater(actual["expires_in"], 3600, "Response should have at least 1 hour expiry")
