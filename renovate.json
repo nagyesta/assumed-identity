@@ -1,11 +1,6 @@
 {
-  "extends": [
-    "config:recommended",
-    ":gitSignOff"
-  ],
-  "assignees": [
-    "nagyesta"
-  ],
+  "extends": ["config:recommended", ":gitSignOff"],
+  "assignees": ["nagyesta"],
   "assigneesSampleSize": 1,
   "commitMessageSuffix": "{patch}",
   "separateMajorMinor": true,
@@ -15,9 +10,7 @@
   },
   "packageRules": [
     {
-      "matchCategories": [
-        "docker"
-      ],
+      "matchCategories": ["docker"],
       "pinDigests": false
     }
   ]

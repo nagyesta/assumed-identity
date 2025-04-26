@@ -19,7 +19,7 @@ def get_token_metadata(resource: str) -> dict:
         "refresh_token": "dummy",
         "expires_in": expires_in,
         "expires_on": expires_on,
-        "token_type": 1
+        "token_type": "Bearer"
     }
 
 
