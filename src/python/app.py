@@ -1,9 +1,11 @@
 import argparse
+import json
 import time
 from argparse import Namespace, ArgumentParser
-
 from flask_parameter_validation import ValidateParameters, Query
-from flask import Flask
+from flask import Flask, request
+from joserfc import jwt
+from joserfc.jwk import KeySet, RSAKey
 
 app = Flask(__name__)
 
@@ -55,4 +57,6 @@ def process_arguments() -> Namespace:
 if __name__ == '__main__':
     args: Namespace = process_arguments()
 
+    app.config.issuer = args.issuer
+    app.config.key = RSAKey.generate_key(2048, {"use": "sig"}) if args.key is None else import_key(args.key)
     app.run(args.host, args.port)
