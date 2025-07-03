@@ -25,6 +25,13 @@ def get_token_metadata(resource: str) -> dict:
     }
 
 
+def import_key(path: str) -> RSAKey:
+    file = open(path, "rb")
+    key = RSAKey.import_key(file.read(), {"use": "sig"})
+    file.close()
+    return key
+
+
 url_regexp = ('^(http(s)?)://'
               '('
               '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}'
