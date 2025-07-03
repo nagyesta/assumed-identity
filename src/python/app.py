@@ -46,6 +46,8 @@ def token(resource: str = Query(pattern=url_regexp)):
 def process_arguments() -> Namespace:
     parser: ArgumentParser = argparse.ArgumentParser(description="Example script with arguments")
     parser.add_argument("--host", help="The host name you want to use", type=str, default="0.0.0.0")
+    parser.add_argument("--issuer", help="The issuer you want to use", type=str, default="https://sts.windows.net/00000000-0000-0000-0000-000000000000/")
+    parser.add_argument("--key", help="The key you want to use", type=str)
     parser.add_argument("--port", help="The port number you want to use", type=int, default=5000)
     return parser.parse_args()
 
