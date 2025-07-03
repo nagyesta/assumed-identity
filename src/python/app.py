@@ -15,10 +15,21 @@ def get_token_metadata(resource: str) -> dict:
     epoch_time: int = int(time.time())
     expires_on: int = epoch_time + expires_in
 
+    header: dict = {
+        "alg": "RS256"
+    }
+
+    claims: dict = {
+        "iss": app.config.issuer,
+        "aud": resource,
+        "exp": expires_on,
+        "nbf": epoch_time,
+        "iat": epoch_time
+    }
+
     return {
         "resource": resource,
-        "access_token": "dummy",
-        "refresh_token": "dummy",
+        "access_token": jwt.encode(header, claims, app.config.key),
         "expires_in": expires_in,
         "expires_on": expires_on,
         "token_type": "Bearer"
