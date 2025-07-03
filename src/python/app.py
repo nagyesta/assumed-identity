@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 import time
 from argparse import Namespace, ArgumentParser
 
@@ -116,8 +117,10 @@ def process_arguments() -> Namespace:
 if __name__ == '__main__':
     args: Namespace = process_arguments()
 
+    issuer = os.getenv("ASSUMED_ID_ISSUER") if os.getenv("ASSUMED_ID_ISSUER") else args.issuer
+    key_path = os.getenv("ASSUMED_ID_KEY_PATH") if os.getenv("ASSUMED_ID_KEY_PATH") else args.key
     app.config.update({
-        "AID_ISSUER": args.issuer,
-        "AID_KEY": init_key(args.key)
+        "AID_ISSUER": issuer,
+        "AID_KEY": key_path
     })
     app.run(args.host, args.port)
