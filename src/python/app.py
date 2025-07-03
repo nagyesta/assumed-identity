@@ -56,6 +56,23 @@ url_regexp = ('^(http(s)?)://'
               '(/[A-Za-z0-9.\\-_/]*)?$')
 
 
+@app.route(rule='/metadata/identity/.well-known/openid-configuration', methods=['GET'])
+@app.route(rule='/metadata/identity/.well-known/openid-configuration/', methods=['GET'])
+@ValidateParameters()
+def configuration():
+    return {
+        "issuer": app.config.issuer,
+        "jwks_uri": f"{request.scheme}://{request.host}/metadata/identity/.well-known/openid-configuration/jwks"
+    }
+
+
+@app.route(rule='/metadata/identity/.well-known/openid-configuration/jwks', methods=['GET'])
+@app.route(rule='/metadata/identity/.well-known/openid-configuration/jwks/', methods=['GET'])
+@ValidateParameters()
+def jwks():
+    return json.dumps(KeySet([app.config.key]).as_dict())
+
+
 @app.route(rule='/metadata/identity/oauth2/token', methods=['GET'])
 @app.route(rule='/metadata/identity/oauth2/token/', methods=['GET'])
 @ValidateParameters()
