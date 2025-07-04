@@ -52,8 +52,8 @@ def generate_key() -> RSAKey:
     return RSAKey.generate_key(2048, {"use": "sig"})
 
 
-def import_key(path: str) -> RSAKey:
-    file = open(path, "rb")
+def import_key(key_path: str) -> RSAKey:
+    file = open(key_path, "rb")
     key = RSAKey.import_key(file.read(), {"use": "sig"})
     file.close()
     return key
@@ -108,7 +108,7 @@ def process_arguments() -> Namespace:
                         default="0.0.0.0")
     parser.add_argument("--issuer", help="The issuer you want to use", type=str,
                         default="https://sts.windows.net/00000000-0000-0000-0000-000000000000/")
-    parser.add_argument("--key", help="The key you want to use", type=str)
+    parser.add_argument("--key-path", help="The path to the key you want to use", type=str)
     parser.add_argument("--port", help="The port number you want to use", type=int,
                         default=5000)
     return parser.parse_args()
@@ -118,9 +118,9 @@ if __name__ == '__main__':
     args: Namespace = process_arguments()
 
     issuer = os.getenv("ASSUMED_ID_ISSUER") if os.getenv("ASSUMED_ID_ISSUER") else args.issuer
-    key_path = os.getenv("ASSUMED_ID_KEY_PATH") if os.getenv("ASSUMED_ID_KEY_PATH") else args.key
+    key_path = os.getenv("ASSUMED_ID_KEY_PATH") if os.getenv("ASSUMED_ID_KEY_PATH") else args.key_path
     app.config.update({
         "AID_ISSUER": issuer,
-        "AID_KEY": key_path
+        "AID_KEY": init_key(key_path)
     })
     app.run(args.host, args.port)
