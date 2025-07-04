@@ -8,9 +8,7 @@ import flask
 from flask_parameter_validation import ValidateParameters, Query
 from flask import Flask, request
 from joserfc import jwt
-from joserfc._keys import KeySetSerialization
-from joserfc.jwk import KeySet, RSAKey
-from joserfc.rfc7518.rsa_key import RSAKey
+from joserfc.jwk import KeySet, KeySetSerialization, RSAKey
 
 app = Flask(__name__)
 
