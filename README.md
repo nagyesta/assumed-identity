@@ -123,6 +123,15 @@ Returns the details of the key used for signing the tokens. For example:
 }
 ```
 
+### Compatibility
+
+Although Assumed Identity is a generic Azure managed identity emulator, it is not guaranteed to work with every project.
+Please find the list of known compatible emulators below:
+
+- [Azure App Configuration Emulator](https://github.com/tnc1997/azure-app-configuration-emulator) from @tnc1997
+- [Azurite](https://learn.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio%2Cblob-storage) from Microsoft
+- [Lowkey Vault](https://github.com/nagyesta/lowkey-vault)
+
 ### Examples
 
 For complete examples of how it can be used in action, please feel free to visit the Lowkey Vault examples which can
