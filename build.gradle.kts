@@ -99,6 +99,14 @@ var installPytest = tasks.register<Exec>("installPytest") {
     dependsOn(upgradePip)
 }
 
+var installITRequirements = tasks.register<Exec>("installITRequirements") {
+    group = "python"
+    description = "Install Integration Test requirements."
+    workingDir = file("src/python")
+    commandLine = listOf("../../venv/bin/pip", "install", "-r", "integration-requirements.txt")
+    dependsOn(installPytest)
+}
+
 var installRequirements = tasks.register<Exec>("installRequirements") {
     group = "python"
     description = "Install requirements."
@@ -114,6 +122,20 @@ var pytest = tasks.register<Exec>("pytest") {
     commandLine = listOf("../../venv/bin/python", "-m", "pytest", "test.py")
     dependsOn(installPytest)
     dependsOn(installRequirements)
+}
+
+var pytestIT = tasks.register<Exec>("pytestIT") {
+    group = "python"
+    description = "Run Python integration tests."
+    workingDir = file("src/python")
+    commandLine = listOf("../../venv/bin/python", "-m", "pytest", "integration.py")
+    dependsOn(installPytest)
+    dependsOn(installITRequirements)
+    dependsOn(runDocker)
+    finalizedBy(stopDocker)
+    doFirst {
+        Thread.sleep(1000)
+    }
 }
 
 var copyDockerfile = tasks.register<Copy>("copyDockerfile") {
@@ -158,6 +180,7 @@ var createDockerBuildx = tasks.register<Exec>("createDockerBuildx") {
     dependsOn(copyDockerfile)
     dependsOn(prepareDockerApp)
     dependsOn(prepareDockerRequirements)
+    dependsOn(pytestIT)
 }
 
 var buildDocker = tasks.register<Exec>("buildDocker") {
@@ -192,7 +215,7 @@ tasks.register<Exec>("buildDockerPush") {
     dependsOn(createDockerBuildx)
 }
 
-tasks.register<Exec>("buildDockerLocal") {
+var buildDockerLocal = tasks.register<Exec>("buildDockerLocal") {
     group = "docker"
     description = "Builds the Docker image for local use."
     inputs.dir(layout.buildDirectory.dir("docker").get().asFile)
@@ -206,4 +229,40 @@ tasks.register<Exec>("buildDockerLocal") {
     dependsOn(copyDockerfile)
     dependsOn(prepareDockerApp)
     dependsOn(prepareDockerRequirements)
+}
+
+var runDocker = tasks.register<Exec>("runDocker") {
+    group = "Docker"
+    description = "Starts a container from the Docker image."
+    inputs.dir(layout.buildDirectory.dir("docker"))
+    workingDir = layout.buildDirectory.dir("docker").get().asFile
+
+    environment(
+        mapOf(
+            "ASSUMED_ID_PORT" to "8080",
+            "ASSUMED_ID_HOST" to "0.0.0.0",
+            "ASSUMED_ID_ISSUER" to "https://sts.windows.net/00000000-0000-0000-0000-000000000001/"
+        )
+    )
+    commandLine = listOf(
+        "docker", "run", "--rm",
+        "--platform", "linux/amd64",
+        "--name", "assumed-identity",
+        "-e", "ASSUMED_ID_PORT",
+        "-e", "ASSUMED_ID_HOST",
+        "-e", "ASSUMED_ID_ISSUER",
+        "-d",
+        "-p", "8080:8080",
+        "nagyesta/assumed-identity:${rootProject.version}"
+    )
+    dependsOn(buildDockerLocal)
+}
+
+var stopDocker = tasks.register<Exec>("stopDocker") {
+    group = "Docker"
+    description = "Stops the Docker container."
+    inputs.dir(layout.buildDirectory.dir("docker"))
+    workingDir = layout.buildDirectory.dir("docker").get().asFile
+    commandLine = listOf("docker", "stop", "assumed-identity")
+    dependsOn(runDocker)
 }
