@@ -4,3 +4,7 @@ build
 .pytest_cache
 venv
 src/python/.pytest_cache
+/&&/
+/bin
+/lib
+/source
