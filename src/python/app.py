@@ -1,11 +1,11 @@
-import argparse
 import json
 import os
+import re
 import time
 from argparse import Namespace, ArgumentParser
+from re import Pattern
 
 import flask
-from flask_parameter_validation import ValidateParameters, Query
 from flask import Flask, request
 from joserfc import jwt
 from joserfc.jwk import KeySet, KeySetSerialization, RSAKey
@@ -78,7 +78,6 @@ def as_json_response(json_content: dict | KeySetSerialization) -> flask.Response
 
 @app.route(rule='/metadata/identity/.well-known/openid-configuration', methods=['GET'])
 @app.route(rule='/metadata/identity/.well-known/openid-configuration/', methods=['GET'])
-@ValidateParameters()
 def configuration():
     return as_json_response({
         "issuer": app.config.get("AID_ISSUER"),
@@ -88,20 +87,22 @@ def configuration():
 
 @app.route(rule='/metadata/identity/.well-known/openid-configuration/jwks', methods=['GET'])
 @app.route(rule='/metadata/identity/.well-known/openid-configuration/jwks/', methods=['GET'])
-@ValidateParameters()
 def jwks():
     return as_json_response(KeySet([app.config.get("AID_KEY")]).as_dict())
 
 
 @app.route(rule='/metadata/identity/oauth2/token', methods=['GET'])
 @app.route(rule='/metadata/identity/oauth2/token/', methods=['GET'])
-@ValidateParameters()
-def token(resource: str = Query(pattern=url_regexp)):
+def token():
+    params: dict = request.args
+    resource: str | None = params.get("resource")
+    if (resource is None) or (re.match(url_regexp, resource) is None):
+        return as_json_response({"error": f"Parameter 'resource' pattern does not match: {url_regexp}"}), 400
     return as_json_response(get_token_metadata(resource))
 
 
 def process_arguments() -> Namespace:
-    parser: ArgumentParser = argparse.ArgumentParser(description="Example script with arguments")
+    parser: ArgumentParser = ArgumentParser(description="Example script with arguments")
     parser.add_argument("--host", help="The host name you want to use", type=str,
                         default="0.0.0.0")
     parser.add_argument("--issuer", help="The issuer you want to use", type=str,
