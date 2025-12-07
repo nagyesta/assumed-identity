@@ -45,18 +45,25 @@ jobs:
         with:
           cache-disabled: true
       - name: Build with Gradle
-        run: ./gradlew clean buildDocker
+        run: ./gradlew printVersion clean buildDocker
       - name: Docker Login
         uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # v3.6.0
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Tag and publish using Gradle
-        run: ./gradlew tagVersion buildDockerPush -PgithubUser=${{ secrets.PUBLISH_USER_NAME }} -PgithubToken=${{ secrets.GITHUB_TOKEN }}
       - name: Read tag name
         id: read-tag-name
         run: |
           echo "RELEASE_TAG_NAME=$(cat ./build/version)" >> "$GITHUB_OUTPUT"
+      - name: Tag version
+        run: |
+          git config --global user.name 'Esta Nagy'
+          git config --global user.email 'nagyesta@gmail.com'
+          git tag ${{ steps.read-tag-name.outputs.RELEASE_TAG_NAME }}
+          git git push origin ${{ steps.read-tag-name.outputs.RELEASE_TAG_NAME }}
+      - name: Publish using Gradle
+        run: ./gradlew buildDockerPush
+
   create-release:
     name: Create Release
     runs-on: ubuntu-latest
