@@ -266,3 +266,18 @@ var stopDocker = tasks.register<Exec>("stopDocker") {
     commandLine = listOf("docker", "stop", "assumed-identity")
     dependsOn(runDocker)
 }
+
+val writeVersion = tasks.register<DefaultTask>("writeVersion") {
+    group = "versioning"
+    description = "Writes project version to a file."
+    outputs.file(layout.buildDirectory.file("version").get().asFile)
+    inputs.property("version", project.version)
+
+    val versionFile = file("build/version")
+    val versionText = project.version.toString()
+    doLast {
+        versionFile.writeText("v${versionText}")
+    }
+    mustRunAfter(tasks.clean)
+}.get()
+buildDocker.get().dependsOn(writeVersion)
