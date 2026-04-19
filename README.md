@@ -64,12 +64,16 @@ implementation. These are specifically mentioned in the Lowkey Vault examples
 
 You can pass environmental variables with the following names and functions to alter Assumed Identity configuration
 
-| Name                | Default                                                       | Description                                                                                                    |
-|---------------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| ASSUMED_ID_PORT     | 80                                                            | The port where Assumed Identity will listen to requests.                                                       |
-| ASSUMED_ID_HOST     | 0.0.0.0                                                       | The host/IP Assumed Identity will use to listen to requests. 0.0.0.0 means any.                                |
-| ASSUMED_ID_ISSUER   | https://sts.windows.net/00000000-0000-0000-0000-000000000000/ | The name of the issuer used in the tokens                                                                      |
-| ASSUMED_ID_KEY_PATH | \<use random generated key>                                   | The path where the RSA key file is mounted (inside the container) that needs to be used for signing the tokens | 
+| Name                                | Default                                                       | Description                                                                                                    |
+|-------------------------------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
+| ASSUMED_ID_PORT                     | 80                                                            | The port where Assumed Identity will listen to requests.                                                       |
+| ASSUMED_ID_HOST                     | 0.0.0.0                                                       | The host/IP Assumed Identity will use to listen to requests. 0.0.0.0 means any.                                |
+| ASSUMED_ID_ISSUER                   | https://sts.windows.net/00000000-0000-0000-0000-000000000000/ | The name of the issuer used in the tokens                                                                      |
+| ASSUMED_ID_KEY_PATH                 | \<use random generated key>                                   | The path where the RSA key file is mounted (inside the container) that needs to be used for signing the tokens | 
+| ASSUMED_ID_SSL_CERTIFICATE_PATH     | \<disabled>                                                   | The path where the SSL certificate file is mounted (inside the container)                                      |
+| ASSUMED_ID_SSL_CERTIFICATE_KEY_PATH | \<disabled>                                                   | The path where the SSL certificate key file is mounted (inside the container)                                  |
+
+When `ASSUMED_ID_SSL_CERTIFICATE_PATH` is set, Assumed Identity serves requests over HTTPS.
 
 ### All endpoints
 

@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import ssl
 import time
 from argparse import Namespace, ArgumentParser
 from re import Pattern
@@ -57,6 +58,16 @@ def import_key(key_path: str) -> RSAKey:
     return key
 
 
+def init_ssl_context(ssl_certificate_path: str | None, ssl_certificate_key_path: str | None) -> ssl.SSLContext | None:
+    if ssl_certificate_path is None:
+        if ssl_certificate_key_path is not None:
+            raise ValueError("SSL certificate key path can only be used together with SSL certificate path")
+        return None
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain(certfile=ssl_certificate_path, keyfile=ssl_certificate_key_path)
+    return context
+
+
 url_regexp = ('^(http(s)?)://'
               '('
               '(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}'
@@ -110,6 +121,8 @@ def process_arguments() -> Namespace:
     parser.add_argument("--key-path", help="The path to the key you want to use", type=str)
     parser.add_argument("--port", help="The port number you want to use", type=int,
                         default=5000)
+    parser.add_argument("--ssl-certificate-path", help="The path to the SSL certificate you want to use", type=str)
+    parser.add_argument("--ssl-certificate-key-path", help="The path to the SSL certificate key you want to use", type=str)
     return parser.parse_args()
 
 
@@ -118,8 +131,10 @@ if __name__ == '__main__':
 
     issuer = os.getenv("ASSUMED_ID_ISSUER") if os.getenv("ASSUMED_ID_ISSUER") else args.issuer
     key_path = os.getenv("ASSUMED_ID_KEY_PATH") if os.getenv("ASSUMED_ID_KEY_PATH") else args.key_path
+    cert_path = os.getenv("ASSUMED_ID_SSL_CERTIFICATE_PATH") if os.getenv("ASSUMED_ID_SSL_CERTIFICATE_PATH") else args.ssl_certificate_path
+    cert_key_path = os.getenv("ASSUMED_ID_SSL_CERTIFICATE_KEY_PATH") if os.getenv("ASSUMED_ID_SSL_CERTIFICATE_KEY_PATH") else args.ssl_certificate_key_path
     app.config.update({
         "AID_ISSUER": issuer,
         "AID_KEY": init_key(key_path)
     })
-    app.run(args.host, args.port)
+    app.run(args.host, args.port, ssl_context=init_ssl_context(cert_path, cert_key_path))
