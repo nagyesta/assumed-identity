@@ -1,5 +1,7 @@
+import sys
 import time
 import unittest
+import unittest.mock
 import pytest
 
 import app
@@ -15,6 +17,40 @@ def test_client():
 
 
 class AppTestCase(unittest.TestCase):
+    def test_process_arguments_should_parse_ssl_certificate_parameters(self):
+        # when
+        with unittest.mock.patch.object(sys, "argv", ["app.py", "--ssl-certificate-path", "certificate.pem", "--ssl-certificate-key-path", "key.pem"]):
+            actual = app.process_arguments()
+
+        # then
+        self.assertEqual("certificate.pem", actual.ssl_certificate_path, "SSL certificate path should have been parsed")
+        self.assertEqual("key.pem", actual.ssl_certificate_key_path, "SSL certificate key path should have been parsed")
+
+    def test_init_ssl_context_should_return_none_when_ssl_certificate_is_not_provided(self):
+        # when
+        actual = app.init_ssl_context(None, None)
+
+        # then
+        self.assertIsNone(actual, "SSL context should be None when no SSL certificate is provided")
+
+    def test_init_ssl_context_should_raise_error_when_ssl_certificate_key_is_provided_without_ssl_certificate(self):
+        # when / then
+        with self.assertRaisesRegex(ValueError, "SSL certificate key path can only be used together with SSL certificate path"):
+            app.init_ssl_context(None, "key.pem")
+
+    def test_init_ssl_context_should_load_ssl_certificate_chain_when_ssl_certificate_is_provided(self):
+        # given
+        expected_context = unittest.mock.MagicMock()
+
+        # when
+        with unittest.mock.patch("app.ssl.SSLContext", return_value=expected_context) as ssl_context_constructor:
+            actual = app.init_ssl_context("certificate.pem", "key.pem")
+
+        # then
+        ssl_context_constructor.assert_called_once_with(app.ssl.PROTOCOL_TLS_SERVER)
+        expected_context.load_cert_chain.assert_called_once_with(certfile="certificate.pem", keyfile="key.pem")
+        self.assertEqual(expected_context, actual, "Returned SSL context should have been the initialized context")
+
     def test_token_endpoint_json_should_contain_expected_Fields_when_called_with_valid_url(self):
         # given
         resource: str = "https://localhost:8443"
