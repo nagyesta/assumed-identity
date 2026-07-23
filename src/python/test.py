@@ -132,7 +132,7 @@ class AppTestCase(unittest.TestCase):
         self.assertEqual(200, actual.status_code, "Response status should have been 200")
         self.assertEqual(actual.json["keys"][0].keys(),
                          {"n", "e", "d", "p", "q", "dp", "dq", "qi", "use", "kty", "kid"},
-                         "Response should have contained the key details")
+                         "Response should have contained the private key details")
 
 
 if __name__ == '__main__':

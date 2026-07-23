@@ -99,7 +99,7 @@ def configuration():
 @app.route(rule='/metadata/identity/.well-known/openid-configuration/jwks', methods=['GET'])
 @app.route(rule='/metadata/identity/.well-known/openid-configuration/jwks/', methods=['GET'])
 def jwks():
-    return as_json_response(KeySet([app.config.get("AID_KEY")]).as_dict())
+    return as_json_response(KeySet([app.config.get("AID_KEY")]).as_dict(private=True))
 
 
 @app.route(rule='/metadata/identity/oauth2/token', methods=['GET'])
